@@ -1,18 +1,13 @@
 package com.sweet.simple.login;
 
+import com.sweet.simple.login.util.SpringContextUtil;
+import com.sweet.simple.login.view.LoginSwing;
+
 import java.awt.*;
 
 public class ViewStart {
 	
 	public static void run() {
-		EventQueue.invokeLater(() -> {
-            try {
-                // 获取LoginPage界面实例并显示
-                // SpringContextUtils.getBean(XXXX.class).setVisible(true);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+		EventQueue.invokeLater(() -> SpringContextUtil.getBean(LoginSwing.class).setVisible(true));
 	}
 }
