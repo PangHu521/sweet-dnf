@@ -32,7 +32,7 @@
 1. **Fork 项目**：在 GitHub 上 fork 我们的项目仓库，获取一份代码副本。
 2. **克隆仓库**：将项目克隆到本地进行开发。
     ```sh
-    git clone https://github.com/PangHu521/sweet-dnf-login.git
+    git clone https://github.com/PangHu521/sweet-dnf.git
     ```
 3. **创建分支**：在开始开发新功能或修复 bug 之前，创建一个新的分支。
     ```sh
