@@ -74,11 +74,13 @@ public class RsaUtil {
         String privateKey = Base64.encode(keyPair.getPrivate().getEncoded());
         String publicKey = Base64.encode(keyPair.getPublic().getEncoded());
 
-        if (hasPrefix)
+        if (hasPrefix) {
             privateKey = PRIVATE_PREFIX + CharPool.LF + privateKey + CharPool.LF + PRIVATE_SUFFIX;
+        }
 
-        if (hasSuffix)
+        if (hasSuffix) {
             publicKey = PUBLIC_PREFIX + CharPool.LF + publicKey + CharPool.LF + PUBLIC_SUFFIX;
+        }
 
         return new Tuple(privateKey, publicKey);
     }

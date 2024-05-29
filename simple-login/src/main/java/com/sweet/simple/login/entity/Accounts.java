@@ -42,8 +42,8 @@ public class Accounts {
     private String qq;
 
     /**
-     * vip玩家，1：是
+     * ip地址
      */
-    @TableField("VIP")
-    private Integer vip;
+    @TableField("ip")
+    private Integer ip;
 }
