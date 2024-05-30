@@ -93,10 +93,12 @@ public class LoginSwing extends JFrame {
         Runtime run = Runtime.getRuntime();
         try {
             run.exec(runCmd);
+        } catch (IOException ignored) {
         }
-        catch (IOException ignored) {}
-        setVisible(false); // 登陆成功，本窗口隐藏
-        dispose(); // 销毁本窗口
+        // 登陆成功，本窗口隐藏
+        setVisible(false);
+        // 销毁本窗口
+        dispose();
     }
 
     /**
