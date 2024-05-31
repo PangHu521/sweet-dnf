@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>2.7.10</spring-boot.version>
+        <flatlafVersion>3.4</flatlafVersion>
     </properties>
 
     <dependencies>
@@ -59,6 +60,66 @@
             <artifactId>hutool-all</artifactId>
             <version>5.8.23</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+            <classifier>linux-x86_64</classifier>
+            <type>so</type>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+            <classifier>macos-arm64</classifier>
+            <type>dylib</type>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+            <classifier>macos-x86_64</classifier>
+            <type>dylib</type>
+        </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+            <classifier>windows-x86_64</classifier>
+            <type>dll</type>
+        </dependency>
+
+        <!-- 32-bit (not needed if you bundle a 64-bit JRE with your application) -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+            <classifier>windows-x86</classifier>
+            <type>dll</type>
+        </dependency>
+
+        <!-- ARM 64-bit (not needed if your application does not support Windows on ARM) -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>${flatlafVersion}</version>
+            <classifier>windows-arm64</classifier>
+            <type>dll</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+           <version>${flatlafVersion}</version>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>

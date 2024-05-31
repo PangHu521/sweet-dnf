@@ -40,6 +40,8 @@ public class LoginSwing extends JFrame {
 
 
     public LoginSwing() {
+        // 设置主题
+        com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightIJTheme.setup();
         setTitle("登陆界面");
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
