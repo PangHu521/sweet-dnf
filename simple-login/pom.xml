@@ -152,7 +152,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.sweet.simple.login.SimpleLoginApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>

@@ -42,10 +42,4 @@ public class Accounts {
      */
     @TableField("qq")
     private String qq;
-
-    /**
-     * ip地址
-     */
-    @TableField("ip")
-    private Integer ip;
 }

@@ -1,10 +1,14 @@
 package com.sweet.simple.login.view;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sweet.simple.login.entity.Accounts;
 import com.sweet.simple.login.service.AccountsService;
 import com.sweet.simple.login.util.RsaUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +16,11 @@ import javax.annotation.Resource;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URLDecoder;
 
 /**
  * 用户登录窗体
@@ -25,8 +33,8 @@ public class LoginSwing extends JFrame {
     /**
      * 游戏目录
      */
-    // private final static String GAME_PATH = "E:/MY-DNF/可玩版本/菲菲游戏-单机-70/客户端";
-    private final static String GAME_PATH = "D:/chromeDownload/地下城与勇士2024/地下城与勇士";
+    private final static String GAME_PATH = "E:\\MY-DNF\\可玩版本\\菲菲游戏-单机-70\\客户端";
+
     @Resource
     private AccountsService accountsService;
 
@@ -77,26 +85,25 @@ public class LoginSwing extends JFrame {
     /**
      * 登录操作
      */
+    @SneakyThrows
     private void loginAction() {
         String username = usernameFiled.getText();
         if (StrUtil.isBlank(username)) {
             JOptionPane.showMessageDialog(null, "账号不能为空", "提示", JOptionPane.ERROR_MESSAGE);
         }
-
         Accounts accounts = accountsService.getOne(new LambdaQueryWrapper<Accounts>().eq(Accounts::getAccountName, username));
         if (accounts == null) {
             JOptionPane.showMessageDialog(null, "账号不存在", "提示", JOptionPane.ERROR_MESSAGE);
         }
-
         String loginParams = RsaUtil.secureId(RsaUtil.PRIVATE_KEY_CONTENT, accounts.getUId());
-        // 最终调用exe文件的脚本
-        String runCmd = StrUtil.format(CMD_PATH, GAME_PATH, loginParams);
+        String runCmd = "start DNF.exe " + loginParams;
         log.info(runCmd);
-        Runtime run = Runtime.getRuntime();
-        try {
-            run.exec(runCmd);
-        } catch (IOException ignored) {
-        }
+        // 创建一个ProcessBuilder对象，指定要执行的命令
+        ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", runCmd);
+        // 设置命令执行的工作目录
+        processBuilder.directory(new File(GAME_PATH));
+        // 启动进程并执行命令
+        processBuilder.start();
         // 登陆成功，本窗口隐藏
         setVisible(false);
         // 销毁本窗口

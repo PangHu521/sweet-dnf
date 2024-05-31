@@ -1,4 +1,6 @@
 spring:
+    main:
+        banner-mode: off
     datasource:
         driver-class-name: com.mysql.jdbc.Driver
         url: jdbc:mysql://192.168.200.131:3306?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&zeroDateTimeBehavior=convertToNull
