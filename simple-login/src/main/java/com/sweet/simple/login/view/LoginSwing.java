@@ -1,10 +1,6 @@
 package com.sweet.simple.login.view;
 
-import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.sweet.simple.login.entity.Accounts;
 import com.sweet.simple.login.service.AccountsService;
-import com.sweet.simple.login.util.RsaUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,14 +9,12 @@ import javax.annotation.Resource;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.File;
 
 /**
  * 用户登录窗体
  */
-
 @Slf4j
-@Component("LoginSwing")
+@Component
 public class LoginSwing extends JFrame {
 
     /**

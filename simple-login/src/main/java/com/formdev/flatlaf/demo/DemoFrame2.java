@@ -1,16 +1,52 @@
+/*
+ * Copyright 2019 FormDev Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.formdev.flatlaf.demo;
 
-import cn.hutool.core.thread.ThreadUtil;
-import com.formdev.flatlaf.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Year;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.prefs.Preferences;
+import javax.swing.*;
+import javax.swing.text.DefaultEditorKit;
+
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.demo.HintManager.Hint;
-import com.formdev.flatlaf.demo.extras.ExtrasPanel;
-import com.formdev.flatlaf.demo.intellijthemes.IJThemesPanel;
-import com.formdev.flatlaf.extras.*;
+import com.formdev.flatlaf.demo.extras.*;
+import com.formdev.flatlaf.demo.intellijthemes.*;
+import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
+import com.formdev.flatlaf.extras.FlatDesktop;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.extras.components.FlatButton.ButtonType;
 import com.formdev.flatlaf.icons.FlatAbstractIcon;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.formdev.flatlaf.extras.FlatSVGUtils;
 import com.formdev.flatlaf.util.ColorFunctions;
 import com.formdev.flatlaf.util.FontUtils;
 import com.formdev.flatlaf.util.LoggingFacade;
@@ -20,74 +56,30 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.layout.UnitValue;
 import net.miginfocom.swing.*;
 
-import javax.swing.*;
-import javax.swing.text.DefaultEditorKit;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.Year;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.prefs.Preferences;
-
 /**
  * @author Karl Tauber
  */
-class DemoFrame extends JFrame {
-
-    /**
-     * 可用字体族名称的数组
-     */
+class DemoFrame2
+        extends JFrame {
     private final String[] availableFontFamilyNames;
     private int initialFontMenuItemCount = -1;
 
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    private JMenuBar menuBar;
-    private JMenuItem exitMenuItem;
-    private JMenu scrollingPopupMenu;
-    private JMenuItem htmlMenuItem;
-    private JMenu fontMenu;
-    private JMenu optionsMenu;
-    private JCheckBoxMenuItem windowDecorationsCheckBoxMenuItem;
-    private JCheckBoxMenuItem menuBarEmbeddedCheckBoxMenuItem;
-    private JCheckBoxMenuItem unifiedTitleBarMenuItem;
-    private JCheckBoxMenuItem showTitleBarIconMenuItem;
-    private JCheckBoxMenuItem underlineMenuSelectionMenuItem;
-    private JCheckBoxMenuItem alwaysShowMnemonicsMenuItem;
-    private JCheckBoxMenuItem animatedLafChangeMenuItem;
-    private JMenuItem aboutMenuItem;
-    private JToolBar toolBar;
-    private JTabbedPane tabbedPane;
-    private ControlBar controlBar;
-    IJThemesPanel themesPanel;
-    // JFormDesigner - End of variables declaration  //GEN-END:variables
-
-    public DemoFrame() {
-        // 从 DemoPrefs 中获取之前保存的选项卡索引，如果没有则默认为0
+    DemoFrame2() {
         int tabIndex = DemoPrefs.getState().getInt(FlatLafDemo.KEY_TAB, 0);
-        // 获取可用字名称数组
         availableFontFamilyNames = FontUtils.getAvailableFontFamilyNames().clone();
-        // 字体排序
         Arrays.sort(availableFontFamilyNames);
-        // 初始化
+
         initComponents();
         updateFontMenuItems();
         initAccentColors();
         initFullWindowContent();
-        controlBar.initialize(this, tabbedPane);
+        // controlBar.initialize(this, tabbedPane);
 
         setIconImages(FlatSVGUtils.createWindowIconImages("/com/formdev/flatlaf/demo/FlatLaf.svg"));
 
-        // 检查选项卡索引是否在有效范围内，并且不等于当前选定的选项卡索引
         if (tabIndex >= 0 && tabIndex < tabbedPane.getTabCount() && tabIndex != tabbedPane.getSelectedIndex())
             tabbedPane.setSelectedIndex(tabIndex);
 
-        // 处理 macOS 下的特定设置。隐藏macOS应用程序菜单中的菜单项，然后根据 macOS 版本设置了窗口的外观和行为，集成 macOS 特定的功能，如关于菜单、偏好设置和退出操作
         // macOS  (see https://www.formdev.com/flatlaf/macos/)
         if (SystemInfo.isMacOS) {
             // hide menu items that are in macOS application menu
@@ -119,8 +111,13 @@ class DemoFrame extends JFrame {
         // integrate into macOS screen menu
         FlatDesktop.setAboutHandler(this::aboutActionPerformed);
         FlatDesktop.setPreferencesHandler(this::showPreferences);
-        FlatDesktop.setQuitHandler(FlatDesktop.QuitResponse::performQuit);
-        SwingUtilities.invokeLater(this::showHints);
+        FlatDesktop.setQuitHandler(response -> {
+            response.performQuit();
+        });
+
+        SwingUtilities.invokeLater(() -> {
+            showHints();
+        });
     }
 
     @Override
@@ -217,19 +214,14 @@ class DemoFrame extends JFrame {
                 "Preferences", JOptionPane.PLAIN_MESSAGE);
     }
 
-    /**
-     * 在选项卡被改变时更新DemoPrefs中保存的选项卡索引
-     * <p>
-     * 具体解释如下：
-     * DemoPrefs.getState().putInt(FlatLafDemo.KEY_TAB, tabbedPane.getSelectedIndex()); - 使用DemoPrefs类来获取保存应用程序状态的对象，并使用putInt()方法将当前选中的选项卡索引保存到状态中。这里使用了FlatLafDemo类中定义的一个常量KEY_TAB作为键来保存选项卡索引。
-     * 通常，此方法将在选项卡的选择发生变化时被调用，以确保用户下次打开应用程序时能够回到上次选择的选项卡。
-     */
     private void selectedTabChanged() {
         DemoPrefs.getState().putInt(FlatLafDemo.KEY_TAB, tabbedPane.getSelectedIndex());
     }
 
     private void menuItemActionPerformed(ActionEvent e) {
-        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, e.getActionCommand(), "Menu Item", JOptionPane.PLAIN_MESSAGE));
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(this, e.getActionCommand(), "Menu Item", JOptionPane.PLAIN_MESSAGE);
+        });
     }
 
     private void windowDecorationsChanged() {
@@ -496,63 +488,15 @@ class DemoFrame extends JFrame {
         return FlatLaf.supportsNativeWindowDecorations() || (SystemInfo.isLinux && JFrame.isDefaultLookAndFeelDecorated());
     }
 
-    /**
-     * 构建 文件 菜单选项
-     */
-    private void buildFileMenu() {
+    private void initComponents() {
+        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu();
         JMenuItem newMenuItem = new JMenuItem();
         JMenuItem openMenuItem = new JMenuItem();
         JMenuItem saveAsMenuItem = new JMenuItem();
         JMenuItem closeMenuItem = new JMenuItem();
         exitMenuItem = new JMenuItem();
-
-        fileMenu.setText("File");
-        fileMenu.setMnemonic('F');
-
-        //---- newMenuItem ----
-        newMenuItem.setText("New");
-        newMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        newMenuItem.setMnemonic('N');
-        newMenuItem.addActionListener(e -> newActionPerformed());
-        fileMenu.add(newMenuItem);
-
-        //---- openMenuItem ----
-        openMenuItem.setText("Open...");
-        openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        openMenuItem.setMnemonic('O');
-        openMenuItem.addActionListener(e -> openActionPerformed());
-        fileMenu.add(openMenuItem);
-
-        //---- saveAsMenuItem ----
-        saveAsMenuItem.setText("Save As...");
-        saveAsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        saveAsMenuItem.setMnemonic('S');
-        saveAsMenuItem.addActionListener(e -> saveAsActionPerformed());
-        fileMenu.add(saveAsMenuItem);
-        fileMenu.addSeparator();
-
-        //---- closeMenuItem ----
-        closeMenuItem.setText("Close");
-        closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        closeMenuItem.setMnemonic('C');
-        closeMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        fileMenu.add(closeMenuItem);
-        fileMenu.addSeparator();
-
-        //---- exitMenuItem ----
-        exitMenuItem.setText("Exit");
-        exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        exitMenuItem.setMnemonic('X');
-        exitMenuItem.addActionListener(e -> exitActionPerformed());
-        fileMenu.add(exitMenuItem);
-        menuBar.add(fileMenu);
-    }
-
-    /**
-     * 构建 Edit 菜单选项
-     */
-    private void buildEditMenu() {
         JMenu editMenu = new JMenu();
         JMenuItem undoMenuItem = new JMenuItem();
         JMenuItem redoMenuItem = new JMenuItem();
@@ -560,65 +504,6 @@ class DemoFrame extends JFrame {
         JMenuItem copyMenuItem = new JMenuItem();
         JMenuItem pasteMenuItem = new JMenuItem();
         JMenuItem deleteMenuItem = new JMenuItem();
-        editMenu.setText("Edit");
-        editMenu.setMnemonic('E');
-
-        //---- undoMenuItem ----
-        undoMenuItem.setText("Undo");
-        undoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        undoMenuItem.setMnemonic('U');
-        undoMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/undo.svg"));
-        undoMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        editMenu.add(undoMenuItem);
-
-        //---- redoMenuItem ----
-        redoMenuItem.setText("Redo");
-        redoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        redoMenuItem.setMnemonic('R');
-        redoMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/redo.svg"));
-        redoMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        editMenu.add(redoMenuItem);
-        editMenu.addSeparator();
-
-        //---- cutMenuItem ----
-        cutMenuItem.setText("Cut");
-        cutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        cutMenuItem.setMnemonic('C');
-        cutMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-cut.svg"));
-        cutMenuItem.addActionListener(new DefaultEditorKit.CutAction());
-        editMenu.add(cutMenuItem);
-
-        //---- copyMenuItem ----
-        copyMenuItem.setText("Copy");
-        copyMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        copyMenuItem.setMnemonic('O');
-        copyMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/copy.svg"));
-        copyMenuItem.addActionListener(new DefaultEditorKit.CopyAction());
-        editMenu.add(copyMenuItem);
-
-        //---- pasteMenuItem ----
-        pasteMenuItem.setText("Paste");
-        pasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        pasteMenuItem.setMnemonic('P');
-        pasteMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-paste.svg"));
-        editMenu.add(pasteMenuItem);
-        editMenu.addSeparator();
-
-        //---- deleteMenuItem ----
-        deleteMenuItem.setText("Delete");
-        deleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-        deleteMenuItem.setMnemonic('D');
-        deleteMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        pasteMenuItem.addActionListener(new DefaultEditorKit.PasteAction());
-        editMenu.add(deleteMenuItem);
-
-        menuBar.add(editMenu);
-    }
-
-    /**
-     * 构建 View 菜单选项
-     */
-    private void buildViewMenu() {
         JMenu viewMenu = new JMenu();
         JCheckBoxMenuItem checkBoxMenuItem1 = new JCheckBoxMenuItem();
         JMenu menu1 = new JMenu();
@@ -629,131 +514,16 @@ class DemoFrame extends JFrame {
         JMenuItem projectViewMenuItem = new JMenuItem();
         JMenuItem structureViewMenuItem = new JMenuItem();
         JMenuItem propertiesViewMenuItem = new JMenuItem();
+        scrollingPopupMenu = new JMenu();
         JMenuItem menuItem2 = new JMenuItem();
         htmlMenuItem = new JMenuItem();
         JRadioButtonMenuItem radioButtonMenuItem1 = new JRadioButtonMenuItem();
         JRadioButtonMenuItem radioButtonMenuItem2 = new JRadioButtonMenuItem();
         JRadioButtonMenuItem radioButtonMenuItem3 = new JRadioButtonMenuItem();
-
-        viewMenu.setText("View");
-        viewMenu.setMnemonic('V');
-        //---- checkBoxMenuItem1 ----
-        checkBoxMenuItem1.setText("Show Toolbar");
-        checkBoxMenuItem1.setSelected(true);
-        checkBoxMenuItem1.setMnemonic('T');
-        checkBoxMenuItem1.addActionListener(e -> menuItemActionPerformed(e));
-        viewMenu.add(checkBoxMenuItem1);
-        //======== menu1 ========
-        menu1.setText("Show View");
-        menu1.setMnemonic('V');
-        //======== subViewsMenu ========
-        subViewsMenu.setText("Sub Views");
-        subViewsMenu.setMnemonic('S');
-        //======== subSubViewsMenu ========
-        subSubViewsMenu.setText("Sub sub Views");
-        subSubViewsMenu.setMnemonic('U');
-        //---- errorLogViewMenuItem ----
-        errorLogViewMenuItem.setText("Error Log");
-        errorLogViewMenuItem.setMnemonic('E');
-        errorLogViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        subSubViewsMenu.add(errorLogViewMenuItem);
-        subViewsMenu.add(subSubViewsMenu);
-        //---- searchViewMenuItem ----
-        searchViewMenuItem.setText("Search");
-        searchViewMenuItem.setMnemonic('S');
-        searchViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        subViewsMenu.add(searchViewMenuItem);
-        menu1.add(subViewsMenu);
-        //---- projectViewMenuItem ----
-        projectViewMenuItem.setText("Project");
-        projectViewMenuItem.setMnemonic('P');
-        projectViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        menu1.add(projectViewMenuItem);
-        //---- structureViewMenuItem ----
-        structureViewMenuItem.setText("Structure");
-        structureViewMenuItem.setMnemonic('T');
-        structureViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        menu1.add(structureViewMenuItem);
-        //---- propertiesViewMenuItem ----
-        propertiesViewMenuItem.setText("Properties");
-        propertiesViewMenuItem.setMnemonic('O');
-        propertiesViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-        menu1.add(propertiesViewMenuItem);
-        viewMenu.add(menu1);
-        //======== scrollingPopupMenu ========
-        scrollingPopupMenu = new JMenu();
-        scrollingPopupMenu.setText("Scrolling Popup Menu");
-        scrollingPopupMenu.add("Large menus are scrollable");
-        scrollingPopupMenu.add("Use mouse wheel to scroll");
-        scrollingPopupMenu.add("Or use up/down arrows at top/bottom");
-        for (int i = 1; i <= 100; i++)
-            scrollingPopupMenu.add("Item " + i);
-
-        viewMenu.add(scrollingPopupMenu);
-        //---- menuItem2 ----
-        menuItem2.setText("Disabled Item");
-        menuItem2.setEnabled(false);
-        viewMenu.add(menuItem2);
-        //---- htmlMenuItem ----
-        htmlMenuItem.setText("<html>some <b color=\"red\">HTML</b> <i color=\"blue\">text</i></html>");
-        viewMenu.add(htmlMenuItem);
-        viewMenu.addSeparator();
-        //---- radioButtonMenuItem1 ----
-        radioButtonMenuItem1.setText("Details");
-        radioButtonMenuItem1.setSelected(true);
-        radioButtonMenuItem1.setMnemonic('D');
-        radioButtonMenuItem1.addActionListener(e -> menuItemActionPerformed(e));
-        viewMenu.add(radioButtonMenuItem1);
-        //---- radioButtonMenuItem2 ----
-        radioButtonMenuItem2.setText("Small Icons");
-        radioButtonMenuItem2.setMnemonic('S');
-        radioButtonMenuItem2.addActionListener(e -> menuItemActionPerformed(e));
-        viewMenu.add(radioButtonMenuItem2);
-        //---- radioButtonMenuItem3 ----
-        radioButtonMenuItem3.setText("Large Icons");
-        radioButtonMenuItem3.setMnemonic('L');
-        radioButtonMenuItem3.addActionListener(e -> menuItemActionPerformed(e));
-        viewMenu.add(radioButtonMenuItem3);
-
-        //---- buttonGroup1 ----
-        ButtonGroup buttonGroup1 = new ButtonGroup();
-        buttonGroup1.add(radioButtonMenuItem1);
-        buttonGroup1.add(radioButtonMenuItem2);
-        buttonGroup1.add(radioButtonMenuItem3);
-        menuBar.add(viewMenu);
-    }
-
-    /**
-     * 构建 Font 菜单选项
-     */
-    private void buildFontMenu() {
+        fontMenu = new JMenu();
         JMenuItem restoreFontMenuItem = new JMenuItem();
         JMenuItem incrFontMenuItem = new JMenuItem();
         JMenuItem decrFontMenuItem = new JMenuItem();
-        //======== fontMenu ========
-        fontMenu.setText("Font");
-        //---- restoreFontMenuItem ----
-        restoreFontMenuItem.setText("Restore Font");
-        restoreFontMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        restoreFontMenuItem.addActionListener(e -> restoreFont());
-        fontMenu.add(restoreFontMenuItem);
-        //---- incrFontMenuItem ----
-        incrFontMenuItem.setText("Increase Font Size");
-        incrFontMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        incrFontMenuItem.addActionListener(e -> incrFont());
-        fontMenu.add(incrFontMenuItem);
-        //---- decrFontMenuItem ----
-        decrFontMenuItem.setText("Decrease Font Size");
-        decrFontMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        decrFontMenuItem.addActionListener(e -> decrFont());
-        fontMenu.add(decrFontMenuItem);
-        menuBar.add(fontMenu);
-    }
-
-    /**
-     * 构建 Options 菜单选项
-     */
-    private void buildOptionsMenu() {
         optionsMenu = new JMenu();
         windowDecorationsCheckBoxMenuItem = new JCheckBoxMenuItem();
         menuBarEmbeddedCheckBoxMenuItem = new JCheckBoxMenuItem();
@@ -762,80 +532,10 @@ class DemoFrame extends JFrame {
         underlineMenuSelectionMenuItem = new JCheckBoxMenuItem();
         alwaysShowMnemonicsMenuItem = new JCheckBoxMenuItem();
         animatedLafChangeMenuItem = new JCheckBoxMenuItem();
-
         JMenuItem showHintsMenuItem = new JMenuItem();
         JMenuItem showUIDefaultsInspectorMenuItem = new JMenuItem();
-        //======== optionsMenu ========
-        optionsMenu.setText("Options");
-        //---- windowDecorationsCheckBoxMenuItem ----
-        windowDecorationsCheckBoxMenuItem.setText("Window decorations");
-        windowDecorationsCheckBoxMenuItem.addActionListener(e -> windowDecorationsChanged());
-        optionsMenu.add(windowDecorationsCheckBoxMenuItem);
-
-        //---- menuBarEmbeddedCheckBoxMenuItem ----
-        menuBarEmbeddedCheckBoxMenuItem.setText("Embedded menu bar");
-        menuBarEmbeddedCheckBoxMenuItem.addActionListener(e -> menuBarEmbeddedChanged());
-        optionsMenu.add(menuBarEmbeddedCheckBoxMenuItem);
-
-        //---- unifiedTitleBarMenuItem ----
-        unifiedTitleBarMenuItem.setText("Unified window title bar");
-        unifiedTitleBarMenuItem.addActionListener(e -> unifiedTitleBar());
-        optionsMenu.add(unifiedTitleBarMenuItem);
-
-        //---- showTitleBarIconMenuItem ----
-        showTitleBarIconMenuItem.setText("Show window title bar icon");
-        showTitleBarIconMenuItem.addActionListener(e -> showTitleBarIcon());
-        optionsMenu.add(showTitleBarIconMenuItem);
-
-        //---- underlineMenuSelectionMenuItem ----
-        underlineMenuSelectionMenuItem.setText("Use underline menu selection");
-        underlineMenuSelectionMenuItem.addActionListener(e -> underlineMenuSelection());
-        optionsMenu.add(underlineMenuSelectionMenuItem);
-
-        //---- alwaysShowMnemonicsMenuItem ----
-        alwaysShowMnemonicsMenuItem.setText("Always show mnemonics");
-        alwaysShowMnemonicsMenuItem.addActionListener(e -> alwaysShowMnemonics());
-        optionsMenu.add(alwaysShowMnemonicsMenuItem);
-
-        //---- animatedLafChangeMenuItem ----
-        animatedLafChangeMenuItem.setText("Animated Laf Change");
-        animatedLafChangeMenuItem.setSelected(true);
-        animatedLafChangeMenuItem.addActionListener(e -> animatedLafChangeChanged());
-        optionsMenu.add(animatedLafChangeMenuItem);
-
-        //---- showHintsMenuItem ----
-        showHintsMenuItem.setText("Show hints");
-        showHintsMenuItem.addActionListener(e -> showHintsChanged());
-        optionsMenu.add(showHintsMenuItem);
-
-        //---- showUIDefaultsInspectorMenuItem ----
-        showUIDefaultsInspectorMenuItem.setText("Show UI Defaults Inspector");
-        showUIDefaultsInspectorMenuItem.addActionListener(e -> showUIDefaultsInspector());
-        optionsMenu.add(showUIDefaultsInspectorMenuItem);
-        menuBar.add(optionsMenu);
-    }
-
-    /**
-     * 构建 Help 菜单选项
-     */
-    private void buildHelpMenu() {
-        aboutMenuItem = new JMenuItem();
-        //======== helpMenu ========
         JMenu helpMenu = new JMenu();
-        helpMenu.setText("Help");
-        helpMenu.setMnemonic('H');
-        //---- aboutMenuItem ----
-        aboutMenuItem.setText("About");
-        aboutMenuItem.setMnemonic('A');
-        aboutMenuItem.addActionListener(e -> aboutActionPerformed());
-        helpMenu.add(aboutMenuItem);
-        menuBar.add(helpMenu);
-    }
-
-    /**
-     * 构建 工具栏
-     */
-    private void buildToolBar(Container contentPane) {
+        aboutMenuItem = new JMenuItem();
         JPanel toolBarPanel = new JPanel();
         JPanel macFullWindowContentButtonsPlaceholder = new JPanel();
         toolBar = new JToolBar();
@@ -846,67 +546,6 @@ class DemoFrame extends JFrame {
         JButton pasteButton = new JButton();
         JButton refreshButton = new JButton();
         JToggleButton showToggleButton = new JToggleButton();
-        toolBarPanel.setLayout(new BorderLayout());
-        //======== macFullWindowContentButtonsPlaceholder ========
-        macFullWindowContentButtonsPlaceholder.setLayout(new FlowLayout());
-        toolBarPanel.add(macFullWindowContentButtonsPlaceholder, BorderLayout.WEST);
-        //======== toolBar ========
-        toolBar.setMargin(new Insets(3, 3, 3, 3));
-        //---- backButton ----
-        backButton.setToolTipText("Back");
-        backButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/back.svg"));
-        toolBar.add(backButton);
-        //---- forwardButton ----
-        forwardButton.setToolTipText("Forward");
-        forwardButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/forward.svg"));
-        toolBar.add(forwardButton);
-        toolBar.addSeparator();
-        //---- cutButton ----
-        cutButton.setToolTipText("Cut");
-        cutButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-cut.svg"));
-        toolBar.add(cutButton);
-        //---- copyButton ----
-        copyButton.setToolTipText("Copy");
-        copyButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/copy.svg"));
-        toolBar.add(copyButton);
-        //---- pasteButton ----
-        pasteButton.setToolTipText("Paste");
-        pasteButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-paste.svg"));
-        toolBar.add(pasteButton);
-        toolBar.addSeparator();
-        //---- refreshButton ----
-        refreshButton.setToolTipText("Refresh");
-        refreshButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/refresh.svg"));
-        toolBar.add(refreshButton);
-        toolBar.addSeparator();
-        //---- showToggleButton ----
-        showToggleButton.setSelected(true);
-        showToggleButton.setToolTipText("Show Details");
-        showToggleButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/show.svg"));
-        toolBar.add(showToggleButton);
-        toolBarPanel.add(toolBar, BorderLayout.CENTER);
-        contentPane.add(toolBarPanel, BorderLayout.PAGE_START);
-        // on macOS, panel left to toolBar is a placeholder for title bar buttons in fullWindowContent mode
-        macFullWindowContentButtonsPlaceholder.putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT_BUTTONS_PLACEHOLDER, "mac zeroInFullScreen");
-    }
-
-    /**
-     * 构建用户图标按钮
-     */
-    private void buildUsersButton() {
-        // 菜单栏中添加一个按钮，用于向用户问候并提供相应的功能
-        FlatButton usersButton = new FlatButton();
-        usersButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/users.svg"));
-        usersButton.setButtonType(ButtonType.toolBarButton);
-        usersButton.setFocusable(false);
-        usersButton.addActionListener(e -> JOptionPane.showMessageDialog(null, "Hello User! How are you?", "User", JOptionPane.INFORMATION_MESSAGE));
-        menuBar.add(Box.createGlue());
-        menuBar.add(usersButton);
-    }
-
-    private void initComponents() {
-        fontMenu = new JMenu();
-        menuBar = new JMenuBar();
         JPanel contentPanel = new JPanel();
         tabbedPane = new JTabbedPane();
         BasicComponentsPanel basicComponentsPanel = new BasicComponentsPanel();
@@ -916,27 +555,365 @@ class DemoFrame extends JFrame {
         OptionPanePanel optionPanePanel = new OptionPanePanel();
         ExtrasPanel extrasPanel = new ExtrasPanel();
         controlBar = new ControlBar();
+        JPanel themesPanelPanel = new JPanel();
+        JPanel winFullWindowContentButtonsPlaceholder = new JPanel();
+        themesPanel = new IJThemesPanel();
 
-        // 设置标题
+        //======== this ========
         setTitle("FlatLaf Demo");
-        // 设置窗口关闭时的默认操作为在关闭窗口时终止应用程序
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        // 获取窗口的内容面板
         Container contentPane = getContentPane();
-        // 设置内容面板 的布局管理器为边界布局
         contentPane.setLayout(new BorderLayout());
-        // 菜单栏
-        buildFileMenu();
-        buildEditMenu();
-        buildViewMenu();
-        buildFontMenu();
-        buildOptionsMenu();
-        buildHelpMenu();
-        setJMenuBar(menuBar);
-        // 工具栏
-        buildToolBar(contentPane);
 
-        //======== 选项卡 ========
+        //======== menuBar ========
+        {
+
+            //======== fileMenu ========
+            {
+                fileMenu.setText("File");
+                fileMenu.setMnemonic('F');
+
+                //---- newMenuItem ----
+                newMenuItem.setText("New");
+                newMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                newMenuItem.setMnemonic('N');
+                newMenuItem.addActionListener(e -> newActionPerformed());
+                fileMenu.add(newMenuItem);
+
+                //---- openMenuItem ----
+                openMenuItem.setText("Open...");
+                openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                openMenuItem.setMnemonic('O');
+                openMenuItem.addActionListener(e -> openActionPerformed());
+                fileMenu.add(openMenuItem);
+
+                //---- saveAsMenuItem ----
+                saveAsMenuItem.setText("Save As...");
+                saveAsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                saveAsMenuItem.setMnemonic('S');
+                saveAsMenuItem.addActionListener(e -> saveAsActionPerformed());
+                fileMenu.add(saveAsMenuItem);
+                fileMenu.addSeparator();
+
+                //---- closeMenuItem ----
+                closeMenuItem.setText("Close");
+                closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                closeMenuItem.setMnemonic('C');
+                closeMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                fileMenu.add(closeMenuItem);
+                fileMenu.addSeparator();
+
+                //---- exitMenuItem ----
+                exitMenuItem.setText("Exit");
+                exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                exitMenuItem.setMnemonic('X');
+                exitMenuItem.addActionListener(e -> exitActionPerformed());
+                fileMenu.add(exitMenuItem);
+            }
+            menuBar.add(fileMenu);
+
+            //======== editMenu ========
+            {
+                editMenu.setText("Edit");
+                editMenu.setMnemonic('E');
+
+                //---- undoMenuItem ----
+                undoMenuItem.setText("Undo");
+                undoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                undoMenuItem.setMnemonic('U');
+                undoMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/undo.svg"));
+                undoMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                editMenu.add(undoMenuItem);
+
+                //---- redoMenuItem ----
+                redoMenuItem.setText("Redo");
+                redoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                redoMenuItem.setMnemonic('R');
+                redoMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/redo.svg"));
+                redoMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                editMenu.add(redoMenuItem);
+                editMenu.addSeparator();
+
+                //---- cutMenuItem ----
+                cutMenuItem.setText("Cut");
+                cutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                cutMenuItem.setMnemonic('C');
+                cutMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-cut.svg"));
+                editMenu.add(cutMenuItem);
+
+                //---- copyMenuItem ----
+                copyMenuItem.setText("Copy");
+                copyMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                copyMenuItem.setMnemonic('O');
+                copyMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/copy.svg"));
+                editMenu.add(copyMenuItem);
+
+                //---- pasteMenuItem ----
+                pasteMenuItem.setText("Paste");
+                pasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                pasteMenuItem.setMnemonic('P');
+                pasteMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-paste.svg"));
+                editMenu.add(pasteMenuItem);
+                editMenu.addSeparator();
+
+                //---- deleteMenuItem ----
+                deleteMenuItem.setText("Delete");
+                deleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+                deleteMenuItem.setMnemonic('D');
+                deleteMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                editMenu.add(deleteMenuItem);
+            }
+            menuBar.add(editMenu);
+
+            //======== viewMenu ========
+            {
+                viewMenu.setText("View");
+                viewMenu.setMnemonic('V');
+
+                //---- checkBoxMenuItem1 ----
+                checkBoxMenuItem1.setText("Show Toolbar");
+                checkBoxMenuItem1.setSelected(true);
+                checkBoxMenuItem1.setMnemonic('T');
+                checkBoxMenuItem1.addActionListener(e -> menuItemActionPerformed(e));
+                viewMenu.add(checkBoxMenuItem1);
+
+                //======== menu1 ========
+                {
+                    menu1.setText("Show View");
+                    menu1.setMnemonic('V');
+
+                    //======== subViewsMenu ========
+                    {
+                        subViewsMenu.setText("Sub Views");
+                        subViewsMenu.setMnemonic('S');
+
+                        //======== subSubViewsMenu ========
+                        {
+                            subSubViewsMenu.setText("Sub sub Views");
+                            subSubViewsMenu.setMnemonic('U');
+
+                            //---- errorLogViewMenuItem ----
+                            errorLogViewMenuItem.setText("Error Log");
+                            errorLogViewMenuItem.setMnemonic('E');
+                            errorLogViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                            subSubViewsMenu.add(errorLogViewMenuItem);
+                        }
+                        subViewsMenu.add(subSubViewsMenu);
+
+                        //---- searchViewMenuItem ----
+                        searchViewMenuItem.setText("Search");
+                        searchViewMenuItem.setMnemonic('S');
+                        searchViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                        subViewsMenu.add(searchViewMenuItem);
+                    }
+                    menu1.add(subViewsMenu);
+
+                    //---- projectViewMenuItem ----
+                    projectViewMenuItem.setText("Project");
+                    projectViewMenuItem.setMnemonic('P');
+                    projectViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                    menu1.add(projectViewMenuItem);
+
+                    //---- structureViewMenuItem ----
+                    structureViewMenuItem.setText("Structure");
+                    structureViewMenuItem.setMnemonic('T');
+                    structureViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                    menu1.add(structureViewMenuItem);
+
+                    //---- propertiesViewMenuItem ----
+                    propertiesViewMenuItem.setText("Properties");
+                    propertiesViewMenuItem.setMnemonic('O');
+                    propertiesViewMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+                    menu1.add(propertiesViewMenuItem);
+                }
+                viewMenu.add(menu1);
+
+                //======== scrollingPopupMenu ========
+                {
+                    scrollingPopupMenu.setText("Scrolling Popup Menu");
+                }
+                viewMenu.add(scrollingPopupMenu);
+
+                //---- menuItem2 ----
+                menuItem2.setText("Disabled Item");
+                menuItem2.setEnabled(false);
+                viewMenu.add(menuItem2);
+
+                //---- htmlMenuItem ----
+                htmlMenuItem.setText("<html>some <b color=\"red\">HTML</b> <i color=\"blue\">text</i></html>");
+                viewMenu.add(htmlMenuItem);
+                viewMenu.addSeparator();
+
+                //---- radioButtonMenuItem1 ----
+                radioButtonMenuItem1.setText("Details");
+                radioButtonMenuItem1.setSelected(true);
+                radioButtonMenuItem1.setMnemonic('D');
+                radioButtonMenuItem1.addActionListener(e -> menuItemActionPerformed(e));
+                viewMenu.add(radioButtonMenuItem1);
+
+                //---- radioButtonMenuItem2 ----
+                radioButtonMenuItem2.setText("Small Icons");
+                radioButtonMenuItem2.setMnemonic('S');
+                radioButtonMenuItem2.addActionListener(e -> menuItemActionPerformed(e));
+                viewMenu.add(radioButtonMenuItem2);
+
+                //---- radioButtonMenuItem3 ----
+                radioButtonMenuItem3.setText("Large Icons");
+                radioButtonMenuItem3.setMnemonic('L');
+                radioButtonMenuItem3.addActionListener(e -> menuItemActionPerformed(e));
+                viewMenu.add(radioButtonMenuItem3);
+            }
+            menuBar.add(viewMenu);
+
+            //======== fontMenu ========
+            {
+                fontMenu.setText("Font");
+
+                //---- restoreFontMenuItem ----
+                restoreFontMenuItem.setText("Restore Font");
+                restoreFontMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                restoreFontMenuItem.addActionListener(e -> restoreFont());
+                fontMenu.add(restoreFontMenuItem);
+
+                //---- incrFontMenuItem ----
+                incrFontMenuItem.setText("Increase Font Size");
+                incrFontMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                incrFontMenuItem.addActionListener(e -> incrFont());
+                fontMenu.add(incrFontMenuItem);
+
+                //---- decrFontMenuItem ----
+                decrFontMenuItem.setText("Decrease Font Size");
+                decrFontMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                decrFontMenuItem.addActionListener(e -> decrFont());
+                fontMenu.add(decrFontMenuItem);
+            }
+            menuBar.add(fontMenu);
+
+            //======== optionsMenu ========
+            {
+                optionsMenu.setText("Options");
+
+                //---- windowDecorationsCheckBoxMenuItem ----
+                windowDecorationsCheckBoxMenuItem.setText("Window decorations");
+                windowDecorationsCheckBoxMenuItem.addActionListener(e -> windowDecorationsChanged());
+                optionsMenu.add(windowDecorationsCheckBoxMenuItem);
+
+                //---- menuBarEmbeddedCheckBoxMenuItem ----
+                menuBarEmbeddedCheckBoxMenuItem.setText("Embedded menu bar");
+                menuBarEmbeddedCheckBoxMenuItem.addActionListener(e -> menuBarEmbeddedChanged());
+                optionsMenu.add(menuBarEmbeddedCheckBoxMenuItem);
+
+                //---- unifiedTitleBarMenuItem ----
+                unifiedTitleBarMenuItem.setText("Unified window title bar");
+                unifiedTitleBarMenuItem.addActionListener(e -> unifiedTitleBar());
+                optionsMenu.add(unifiedTitleBarMenuItem);
+
+                //---- showTitleBarIconMenuItem ----
+                showTitleBarIconMenuItem.setText("Show window title bar icon");
+                showTitleBarIconMenuItem.addActionListener(e -> showTitleBarIcon());
+                optionsMenu.add(showTitleBarIconMenuItem);
+
+                //---- underlineMenuSelectionMenuItem ----
+                underlineMenuSelectionMenuItem.setText("Use underline menu selection");
+                underlineMenuSelectionMenuItem.addActionListener(e -> underlineMenuSelection());
+                optionsMenu.add(underlineMenuSelectionMenuItem);
+
+                //---- alwaysShowMnemonicsMenuItem ----
+                alwaysShowMnemonicsMenuItem.setText("Always show mnemonics");
+                alwaysShowMnemonicsMenuItem.addActionListener(e -> alwaysShowMnemonics());
+                optionsMenu.add(alwaysShowMnemonicsMenuItem);
+
+                //---- animatedLafChangeMenuItem ----
+                animatedLafChangeMenuItem.setText("Animated Laf Change");
+                animatedLafChangeMenuItem.setSelected(true);
+                animatedLafChangeMenuItem.addActionListener(e -> animatedLafChangeChanged());
+                optionsMenu.add(animatedLafChangeMenuItem);
+
+                //---- showHintsMenuItem ----
+                showHintsMenuItem.setText("Show hints");
+                showHintsMenuItem.addActionListener(e -> showHintsChanged());
+                optionsMenu.add(showHintsMenuItem);
+
+                //---- showUIDefaultsInspectorMenuItem ----
+                showUIDefaultsInspectorMenuItem.setText("Show UI Defaults Inspector");
+                showUIDefaultsInspectorMenuItem.addActionListener(e -> showUIDefaultsInspector());
+                optionsMenu.add(showUIDefaultsInspectorMenuItem);
+            }
+            menuBar.add(optionsMenu);
+
+            //======== helpMenu ========
+            {
+                helpMenu.setText("Help");
+                helpMenu.setMnemonic('H');
+
+                //---- aboutMenuItem ----
+                aboutMenuItem.setText("About");
+                aboutMenuItem.setMnemonic('A');
+                aboutMenuItem.addActionListener(e -> aboutActionPerformed());
+                helpMenu.add(aboutMenuItem);
+            }
+            menuBar.add(helpMenu);
+        }
+        setJMenuBar(menuBar);
+
+        //======== toolBarPanel ========
+        {
+            toolBarPanel.setLayout(new BorderLayout());
+
+            //======== macFullWindowContentButtonsPlaceholder ========
+            {
+                macFullWindowContentButtonsPlaceholder.setLayout(new FlowLayout());
+            }
+            toolBarPanel.add(macFullWindowContentButtonsPlaceholder, BorderLayout.WEST);
+
+            //======== toolBar ========
+            {
+                toolBar.setMargin(new Insets(3, 3, 3, 3));
+
+                //---- backButton ----
+                backButton.setToolTipText("Back");
+                backButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/back.svg"));
+                toolBar.add(backButton);
+
+                //---- forwardButton ----
+                forwardButton.setToolTipText("Forward");
+                forwardButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/forward.svg"));
+                toolBar.add(forwardButton);
+                toolBar.addSeparator();
+
+                //---- cutButton ----
+                cutButton.setToolTipText("Cut");
+                cutButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-cut.svg"));
+                toolBar.add(cutButton);
+
+                //---- copyButton ----
+                copyButton.setToolTipText("Copy");
+                copyButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/copy.svg"));
+                toolBar.add(copyButton);
+
+                //---- pasteButton ----
+                pasteButton.setToolTipText("Paste");
+                pasteButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-paste.svg"));
+                toolBar.add(pasteButton);
+                toolBar.addSeparator();
+
+                //---- refreshButton ----
+                refreshButton.setToolTipText("Refresh");
+                refreshButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/refresh.svg"));
+                toolBar.add(refreshButton);
+                toolBar.addSeparator();
+
+                //---- showToggleButton ----
+                showToggleButton.setSelected(true);
+                showToggleButton.setToolTipText("Show Details");
+                showToggleButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/show.svg"));
+                toolBar.add(showToggleButton);
+            }
+            toolBarPanel.add(toolBar, BorderLayout.CENTER);
+        }
+        contentPane.add(toolBarPanel, BorderLayout.PAGE_START);
+
+        //======== contentPanel ========
         {
             contentPanel.setLayout(new MigLayout(
                     "insets dialog,hidemode 3",
@@ -960,40 +937,46 @@ class DemoFrame extends JFrame {
         }
         contentPane.add(contentPanel, BorderLayout.CENTER);
         contentPane.add(controlBar, BorderLayout.PAGE_END);
-        // 主题面板
-        themesPanel = new IJThemesPanel();
-        JPanel themesPanelPanel = new JPanel();
-        JPanel winFullWindowContentButtonsPlaceholder = new JPanel();
-        themesPanelPanel.setLayout(new BorderLayout());
-        // ======== winFullWindowContentButtonsPlaceholder ========
-        winFullWindowContentButtonsPlaceholder.setLayout(new FlowLayout());
-        themesPanelPanel.add(winFullWindowContentButtonsPlaceholder, BorderLayout.NORTH);
-        themesPanelPanel.add(themesPanel, BorderLayout.CENTER);
+
+        //======== themesPanelPanel ========
+        {
+            themesPanelPanel.setLayout(new BorderLayout());
+
+            //======== winFullWindowContentButtonsPlaceholder ========
+            {
+                winFullWindowContentButtonsPlaceholder.setLayout(new FlowLayout());
+            }
+            themesPanelPanel.add(winFullWindowContentButtonsPlaceholder, BorderLayout.NORTH);
+            themesPanelPanel.add(themesPanel, BorderLayout.CENTER);
+        }
         contentPane.add(themesPanelPanel, BorderLayout.LINE_END);
-        // on Windows/Linux, panel above themesPanel is a placeholder for title bar buttons in fullWindowContent mode
-        winFullWindowContentButtonsPlaceholder.putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT_BUTTONS_PLACEHOLDER, "win");
 
+        //---- buttonGroup1 ----
+        ButtonGroup buttonGroup1 = new ButtonGroup();
+        buttonGroup1.add(radioButtonMenuItem1);
+        buttonGroup1.add(radioButtonMenuItem2);
+        buttonGroup1.add(radioButtonMenuItem3);
+        // JFormDesigner - End of component initialization  //GEN-END:initComponents
 
-        // 用户图标
-        buildUsersButton();
+        // add "Users" button to menubar
+        FlatButton usersButton = new FlatButton();
+        usersButton.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/users.svg"));
+        usersButton.setButtonType(ButtonType.toolBarButton);
+        usersButton.setFocusable(false);
+        usersButton.addActionListener(e -> JOptionPane.showMessageDialog(null, "Hello User! How are you?", "User", JOptionPane.INFORMATION_MESSAGE));
+        menuBar.add(Box.createGlue());
+        menuBar.add(usersButton);
 
-        // 设置视图里面的长菜单项
-        /*scrollingPopupMenu.add("Large menus are scrollable");
+        cutMenuItem.addActionListener(new DefaultEditorKit.CutAction());
+        copyMenuItem.addActionListener(new DefaultEditorKit.CopyAction());
+        pasteMenuItem.addActionListener(new DefaultEditorKit.PasteAction());
+
+        scrollingPopupMenu.add("Large menus are scrollable");
         scrollingPopupMenu.add("Use mouse wheel to scroll");
         scrollingPopupMenu.add("Or use up/down arrows at top/bottom");
         for (int i = 1; i <= 100; i++)
-            scrollingPopupMenu.add("Item " + i);*/
+            scrollingPopupMenu.add("Item " + i);
 
-        /*
-        if (supportsFlatLafWindowDecorations()) { - 检查是否支持 FlatLaf 的窗口装饰。如果支持，进入条件语句块；否则，执行 else 块中的代码。
-        if (SystemInfo.isLinux) - 如果当前系统是 Linux，则调用 unsupported(windowDecorationsCheckBoxMenuItem) 方法，这可能是用于标记不支持某个选项。在 Linux 上可能会有一些特定的限制或不兼容性。
-        否则，设置 windowDecorationsCheckBoxMenuItem 的选中状态，根据 FlatLaf.isUseNativeWindowDecorations() 方法来确定是否启用原生窗口装饰。
-        设置其他选项的选中状态，这些选项包括 menuBarEmbeddedCheckBoxMenuItem、unifiedTitleBarMenuItem 和 showTitleBarIconMenuItem，这些选项控制着菜单栏是否嵌入在窗口标题栏中、标题栏是否使用统一的背景以及是否显示标题栏图标。
-        else 块中，对不支持的选项调用 unsupported() 方法，这可能是禁用相应的用户界面元素。
-        if (SystemInfo.isMacOS) - 如果当前系统是 macOS，则对 underlineMenuSelectionMenuItem 调用 unsupported() 方法，这可能是因为在 macOS 上不支持该菜单选择的下划线样式。
-        最后一个条件是检查是否需要禁用平滑的外观切换动画，如果系统属性 flatlaf.animatedLafChange 的值为 "false"，则取消选中 animatedLafChangeMenuItem。
-        总体来说，这段代码用于根据系统和 FlatLaf 的支持情况来设置和调整一些应用程序界面的选项。
-         */
         if (supportsFlatLafWindowDecorations()) {
             if (SystemInfo.isLinux)
                 unsupported(windowDecorationsCheckBoxMenuItem);
@@ -1015,12 +998,18 @@ class DemoFrame extends JFrame {
         if ("false".equals(System.getProperty("flatlaf.animatedLafChange")))
             animatedLafChangeMenuItem.setSelected(false);
 
+
+        // on macOS, panel left to toolBar is a placeholder for title bar buttons in fullWindowContent mode
+        macFullWindowContentButtonsPlaceholder.putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT_BUTTONS_PLACEHOLDER, "mac zeroInFullScreen");
+
+        // on Windows/Linux, panel above themesPanel is a placeholder for title bar buttons in fullWindowContent mode
+        winFullWindowContentButtonsPlaceholder.putClientProperty(FlatClientProperties.FULL_WINDOW_CONTENT_BUTTONS_PLACEHOLDER, "win");
+
         // uncomment this line to see title bar buttons placeholders in fullWindowContent mode
-        // UIManager.put( "FlatLaf.debug.panel.showPlaceholders", true );
+//		UIManager.put( "FlatLaf.debug.panel.showPlaceholders", true );
 
 
         // remove contentPanel bottom insets
-        // 使用 MigLayout 的面板中移除底部的边距。通过解析当前的布局约束，将底部边距设置为零，然后重新应用修改后的约束，从而实现底部边距的移除
         MigLayout layout = (MigLayout) contentPanel.getLayout();
         LC lc = ConstraintParser.parseLayoutConstraint((String) layout.getLayoutConstraints());
         UnitValue[] insets = lc.getInsets();
@@ -1039,8 +1028,31 @@ class DemoFrame extends JFrame {
         menuItem.setToolTipText("Not supported on your system.");
     }
 
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    private JMenuBar menuBar;
+    private JMenuItem exitMenuItem;
+    private JMenu scrollingPopupMenu;
+    private JMenuItem htmlMenuItem;
+    private JMenu fontMenu;
+    private JMenu optionsMenu;
+    private JCheckBoxMenuItem windowDecorationsCheckBoxMenuItem;
+    private JCheckBoxMenuItem menuBarEmbeddedCheckBoxMenuItem;
+    private JCheckBoxMenuItem unifiedTitleBarMenuItem;
+    private JCheckBoxMenuItem showTitleBarIconMenuItem;
+    private JCheckBoxMenuItem underlineMenuSelectionMenuItem;
+    private JCheckBoxMenuItem alwaysShowMnemonicsMenuItem;
+    private JCheckBoxMenuItem animatedLafChangeMenuItem;
+    private JMenuItem aboutMenuItem;
+    private JToolBar toolBar;
+    private JTabbedPane tabbedPane;
+    private ControlBar controlBar;
+    IJThemesPanel themesPanel;
+    // JFormDesigner - End of variables declaration  //GEN-END:variables
+
     //---- class AccentColorIcon ----------------------------------------------
-    private static class AccentColorIcon extends FlatAbstractIcon {
+
+    private static class AccentColorIcon
+            extends FlatAbstractIcon {
         private final String colorKey;
 
         AccentColorIcon(String colorKey) {

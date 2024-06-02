@@ -1,4 +1,4 @@
-package com.formdev.flatlaf.demo.intellijthemes;
+package com.sweet.simple.login.intellijthemes;
 
 import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.demo.DemoPrefs;
@@ -9,7 +9,7 @@ import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.formdev.flatlaf.ui.FlatListUI;
 import com.formdev.flatlaf.util.LoggingFacade;
 import com.formdev.flatlaf.util.StringUtils;
-import net.miginfocom.swing.*;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -199,7 +199,7 @@ public class IJThemesPanel extends JPanel {
 				return themes.size();
 			}
 			@Override
-			public IJThemeInfo getElementAt( int index ) {
+			public IJThemeInfo getElementAt(int index ) {
 				return themes.get( index );
 			}
 		} );

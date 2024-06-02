@@ -1,4 +1,4 @@
-package com.formdev.flatlaf.demo.intellijthemes;
+package com.sweet.simple.login.intellijthemes;
 
 import java.io.File;
 

@@ -5,11 +5,16 @@ import com.formdev.flatlaf.fonts.inter.FlatInterFont;
 import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.fonts.roboto_mono.FlatRobotoMonoFont;
-import com.sweet.simple.login.view.SweetFrame;
+import com.sweet.simple.login.view.MainFrame;
 import com.sweet.simple.login.view.SweetPreferences;
 
 import javax.swing.*;
 
+/**
+ * 主窗口启动程序
+ *
+ * @author 大师兄
+ */
 public class ViewStart {
 
 	/**
@@ -17,15 +22,23 @@ public class ViewStart {
 	 */
 	public static final String PREFERENCES_ROOT_PATH = "/sweet-dnf";
 
-	// 是否处于截图模式
+	/**
+	 * 是否处于截图模式
+	 */
 	public static boolean screenshotsMode = Boolean.parseBoolean(System.getProperty("flatlaf.demo.screenshotsMode"));
 
 	public static final String KEY_TAB = "tab";
-	
+
+	/**
+	 * 启动
+	 */
 	public static void run(String[] args) {
 		SwingUtilities.invokeLater(() -> invokeLater(args));
 	}
 
+	/**
+	 * 启动需要执行的逻辑
+	 */
 	private static void invokeLater(String[] args) {
 		SweetPreferences.init(PREFERENCES_ROOT_PATH);
 		// 延迟加载字体
@@ -37,12 +50,10 @@ public class ViewStart {
 		FlatLaf.registerCustomDefaultsSource("com.formdev.flatlaf.demo");
 		// 用户偏好设置
 		SweetPreferences.setupLaf(args);
-
-		SweetFrame sweetFrame = new SweetFrame();
-
-		// LoginSwing loginSwing = SpringContextUtil.getBean(LoginSwing.class);
-		sweetFrame.pack();
-		sweetFrame.setLocationRelativeTo(null);
-		sweetFrame.setVisible(true);
+		// 创建主窗口
+		MainFrame mainFrame = new MainFrame();
+		mainFrame.pack();
+		mainFrame.setLocationRelativeTo(null);
+		mainFrame.setVisible(true);
 	}
 }
