@@ -1,7 +1,6 @@
 package com.sweet.simple.login.view;
 
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.demo.DemoPrefs;
 import com.formdev.flatlaf.ui.FlatDropShadowBorder;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatUIUtils;
@@ -37,7 +36,7 @@ class HintManager {
      */
     public static void showHint(Hint hint) {
         // 检查用户是否已经关闭提示
-        if (DemoPrefs.getState().getBoolean(hint.prefsKey, false)) {
+        if (SweetPreferences.getState().getBoolean(hint.prefsKey, false)) {
             if (hint.nextHint != null)
                 showHint(hint.nextHint);
             return;
@@ -250,8 +249,8 @@ class HintManager {
             // 隐藏当前的提示框
             hideHint();
 
-            // 使用 DemoPrefs.getState().putBoolean(hint.prefsKey, true) 语句，将一个布尔值标记为 true，以表示用户已经关闭了此提示框。这个布尔值通常用于保存用户的偏好设置，以便在下次打开应用程序时能够记住用户的操作
-            DemoPrefs.getState().putBoolean(hint.prefsKey, true);
+            // 使用 SweetPreferences.getState().putBoolean(hint.prefsKey, true) 语句，将一个布尔值标记为 true，以表示用户已经关闭了此提示框。这个布尔值通常用于保存用户的偏好设置，以便在下次打开应用程序时能够记住用户的操作
+            SweetPreferences.getState().putBoolean(hint.prefsKey, true);
 
             // 如果当前提示框有关联的下一个提示框（即 hint.nextHint 不为 null），则调用 HintManager.showHint(hint.nextHint) 方法来显示下一个提示框
             if (hint.nextHint != null)

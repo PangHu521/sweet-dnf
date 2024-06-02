@@ -10,6 +10,6 @@ public class SimpleLoginApplication {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(SimpleLoginApplication.class).headless(false).run(args);
-        ViewStart.run();
+        ViewStart.run(args);
     }
 }

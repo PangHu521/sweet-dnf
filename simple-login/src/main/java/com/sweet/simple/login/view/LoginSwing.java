@@ -1,8 +1,5 @@
 package com.sweet.simple.login.view;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sweet.simple.login.entity.Accounts;
@@ -16,11 +13,7 @@ import javax.annotation.Resource;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URLDecoder;
 
 /**
  * 用户登录窗体
@@ -87,7 +80,16 @@ public class LoginSwing extends JFrame {
      */
     @SneakyThrows
     private void loginAction() {
-        String username = usernameFiled.getText();
+        // 测试弹窗
+        SweetPreferences.getState().putBoolean("test", false);
+        HintManager.Hint testHint = new HintManager.Hint("Use 'Font' menu to increase/decrease font size or try different fonts.",
+                usernameFiled, SwingConstants.BOTTOM, "test", null);
+        log.info("执行了。。。。。");
+        HintManager.showHint(testHint);
+
+        // SwingUtilities.invokeLater(this::showHints);
+
+        /*String username = usernameFiled.getText();
         if (StrUtil.isBlank(username)) {
             JOptionPane.showMessageDialog(null, "账号不能为空", "提示", JOptionPane.ERROR_MESSAGE);
         }
@@ -107,7 +109,7 @@ public class LoginSwing extends JFrame {
         // 登陆成功，本窗口隐藏
         setVisible(false);
         // 销毁本窗口
-        dispose();
+        dispose();*/
     }
 
     /**
