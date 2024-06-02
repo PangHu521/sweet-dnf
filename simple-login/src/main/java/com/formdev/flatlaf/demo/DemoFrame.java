@@ -38,6 +38,10 @@ import java.util.prefs.Preferences;
  * @author Karl Tauber
  */
 class DemoFrame extends JFrame {
+
+    /**
+     * 可用字体族名称的数组
+     */
     private final String[] availableFontFamilyNames;
     private int initialFontMenuItemCount = -1;
 
@@ -65,8 +69,11 @@ class DemoFrame extends JFrame {
     public DemoFrame() {
         // 从 DemoPrefs 中获取之前保存的选项卡索引，如果没有则默认为0
         int tabIndex = DemoPrefs.getState().getInt(FlatLafDemo.KEY_TAB, 0);
+        // 获取可用字名称数组
         availableFontFamilyNames = FontUtils.getAvailableFontFamilyNames().clone();
+        // 字体排序
         Arrays.sort(availableFontFamilyNames);
+        // 初始化
         initComponents();
         updateFontMenuItems();
         initAccentColors();
@@ -75,9 +82,11 @@ class DemoFrame extends JFrame {
 
         setIconImages(FlatSVGUtils.createWindowIconImages("/com/formdev/flatlaf/demo/FlatLaf.svg"));
 
+        // 检查选项卡索引是否在有效范围内，并且不等于当前选定的选项卡索引
         if (tabIndex >= 0 && tabIndex < tabbedPane.getTabCount() && tabIndex != tabbedPane.getSelectedIndex())
             tabbedPane.setSelectedIndex(tabIndex);
 
+        // 处理 macOS 下的特定设置。隐藏macOS应用程序菜单中的菜单项，然后根据 macOS 版本设置了窗口的外观和行为，集成 macOS 特定的功能，如关于菜单、偏好设置和退出操作
         // macOS  (see https://www.formdev.com/flatlaf/macos/)
         if (SystemInfo.isMacOS) {
             // hide menu items that are in macOS application menu
@@ -486,15 +495,57 @@ class DemoFrame extends JFrame {
         return FlatLaf.supportsNativeWindowDecorations() || (SystemInfo.isLinux && JFrame.isDefaultLookAndFeelDecorated());
     }
 
-    private void initComponents() {
-        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        menuBar = new JMenuBar();
+    private void buildFileMenu() {
         JMenu fileMenu = new JMenu();
         JMenuItem newMenuItem = new JMenuItem();
         JMenuItem openMenuItem = new JMenuItem();
         JMenuItem saveAsMenuItem = new JMenuItem();
         JMenuItem closeMenuItem = new JMenuItem();
         exitMenuItem = new JMenuItem();
+
+        fileMenu.setText("File");
+        fileMenu.setMnemonic('F');
+
+        //---- newMenuItem ----
+        newMenuItem.setText("New");
+        newMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        newMenuItem.setMnemonic('N');
+        newMenuItem.addActionListener(e -> newActionPerformed());
+        fileMenu.add(newMenuItem);
+
+        //---- openMenuItem ----
+        openMenuItem.setText("Open...");
+        openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        openMenuItem.setMnemonic('O');
+        openMenuItem.addActionListener(e -> openActionPerformed());
+        fileMenu.add(openMenuItem);
+
+        //---- saveAsMenuItem ----
+        saveAsMenuItem.setText("Save As...");
+        saveAsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        saveAsMenuItem.setMnemonic('S');
+        saveAsMenuItem.addActionListener(e -> saveAsActionPerformed());
+        fileMenu.add(saveAsMenuItem);
+        fileMenu.addSeparator();
+
+        //---- closeMenuItem ----
+        closeMenuItem.setText("Close");
+        closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        closeMenuItem.setMnemonic('C');
+        closeMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+        fileMenu.add(closeMenuItem);
+        fileMenu.addSeparator();
+
+        //---- exitMenuItem ----
+        exitMenuItem.setText("Exit");
+        exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        exitMenuItem.setMnemonic('X');
+        exitMenuItem.addActionListener(e -> exitActionPerformed());
+        fileMenu.add(exitMenuItem);
+        menuBar.add(fileMenu);
+    }
+
+    private void buildEditMenu() {
         JMenu editMenu = new JMenu();
         JMenuItem undoMenuItem = new JMenuItem();
         JMenuItem redoMenuItem = new JMenuItem();
@@ -502,6 +553,63 @@ class DemoFrame extends JFrame {
         JMenuItem copyMenuItem = new JMenuItem();
         JMenuItem pasteMenuItem = new JMenuItem();
         JMenuItem deleteMenuItem = new JMenuItem();
+        editMenu.setText("Edit");
+        editMenu.setMnemonic('E');
+
+        //---- undoMenuItem ----
+        undoMenuItem.setText("Undo");
+        undoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        undoMenuItem.setMnemonic('U');
+        undoMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/undo.svg"));
+        undoMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+        editMenu.add(undoMenuItem);
+
+        //---- redoMenuItem ----
+        redoMenuItem.setText("Redo");
+        redoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        redoMenuItem.setMnemonic('R');
+        redoMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/redo.svg"));
+        redoMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+        editMenu.add(redoMenuItem);
+        editMenu.addSeparator();
+
+        //---- cutMenuItem ----
+        cutMenuItem.setText("Cut");
+        cutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        cutMenuItem.setMnemonic('C');
+        cutMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-cut.svg"));
+        cutMenuItem.addActionListener(new DefaultEditorKit.CutAction());
+        editMenu.add(cutMenuItem);
+
+        //---- copyMenuItem ----
+        copyMenuItem.setText("Copy");
+        copyMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        copyMenuItem.setMnemonic('O');
+        copyMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/copy.svg"));
+        copyMenuItem.addActionListener(new DefaultEditorKit.CopyAction());
+        editMenu.add(copyMenuItem);
+
+        //---- pasteMenuItem ----
+        pasteMenuItem.setText("Paste");
+        pasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        pasteMenuItem.setMnemonic('P');
+        pasteMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-paste.svg"));
+        editMenu.add(pasteMenuItem);
+        editMenu.addSeparator();
+
+        //---- deleteMenuItem ----
+        deleteMenuItem.setText("Delete");
+        deleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+        deleteMenuItem.setMnemonic('D');
+        deleteMenuItem.addActionListener(e -> menuItemActionPerformed(e));
+        pasteMenuItem.addActionListener(new DefaultEditorKit.PasteAction());
+        editMenu.add(deleteMenuItem);
+
+        menuBar.add(editMenu);
+    }
+
+    private void initComponents() {
+        menuBar = new JMenuBar();
         JMenu viewMenu = new JMenu();
         JCheckBoxMenuItem checkBoxMenuItem1 = new JCheckBoxMenuItem();
         JMenu menu1 = new JMenu();
@@ -558,111 +666,19 @@ class DemoFrame extends JFrame {
         themesPanel = new IJThemesPanel();
 
         //======== this ========
+        // 设置标题
         setTitle("FlatLaf Demo");
+        // 设置窗口关闭时的默认操作为在关闭窗口时终止应用程序
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        // 获取窗口的内容面板
         Container contentPane = getContentPane();
+        // 设置内容面板 的布局管理器为边界布局
         contentPane.setLayout(new BorderLayout());
 
         //======== menuBar ========
         {
-
-            //======== fileMenu ========
-            {
-                fileMenu.setText("File");
-                fileMenu.setMnemonic('F');
-
-                //---- newMenuItem ----
-                newMenuItem.setText("New");
-                newMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                newMenuItem.setMnemonic('N');
-                newMenuItem.addActionListener(e -> newActionPerformed());
-                fileMenu.add(newMenuItem);
-
-                //---- openMenuItem ----
-                openMenuItem.setText("Open...");
-                openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                openMenuItem.setMnemonic('O');
-                openMenuItem.addActionListener(e -> openActionPerformed());
-                fileMenu.add(openMenuItem);
-
-                //---- saveAsMenuItem ----
-                saveAsMenuItem.setText("Save As...");
-                saveAsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                saveAsMenuItem.setMnemonic('S');
-                saveAsMenuItem.addActionListener(e -> saveAsActionPerformed());
-                fileMenu.add(saveAsMenuItem);
-                fileMenu.addSeparator();
-
-                //---- closeMenuItem ----
-                closeMenuItem.setText("Close");
-                closeMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                closeMenuItem.setMnemonic('C');
-                closeMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-                fileMenu.add(closeMenuItem);
-                fileMenu.addSeparator();
-
-                //---- exitMenuItem ----
-                exitMenuItem.setText("Exit");
-                exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                exitMenuItem.setMnemonic('X');
-                exitMenuItem.addActionListener(e -> exitActionPerformed());
-                fileMenu.add(exitMenuItem);
-            }
-            menuBar.add(fileMenu);
-
-            //======== editMenu ========
-            {
-                editMenu.setText("Edit");
-                editMenu.setMnemonic('E');
-
-                //---- undoMenuItem ----
-                undoMenuItem.setText("Undo");
-                undoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                undoMenuItem.setMnemonic('U');
-                undoMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/undo.svg"));
-                undoMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-                editMenu.add(undoMenuItem);
-
-                //---- redoMenuItem ----
-                redoMenuItem.setText("Redo");
-                redoMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                redoMenuItem.setMnemonic('R');
-                redoMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/redo.svg"));
-                redoMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-                editMenu.add(redoMenuItem);
-                editMenu.addSeparator();
-
-                //---- cutMenuItem ----
-                cutMenuItem.setText("Cut");
-                cutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                cutMenuItem.setMnemonic('C');
-                cutMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-cut.svg"));
-                editMenu.add(cutMenuItem);
-
-                //---- copyMenuItem ----
-                copyMenuItem.setText("Copy");
-                copyMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                copyMenuItem.setMnemonic('O');
-                copyMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/copy.svg"));
-                editMenu.add(copyMenuItem);
-
-                //---- pasteMenuItem ----
-                pasteMenuItem.setText("Paste");
-                pasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-                pasteMenuItem.setMnemonic('P');
-                pasteMenuItem.setIcon(new FlatSVGIcon("com/formdev/flatlaf/demo/icons/menu-paste.svg"));
-                editMenu.add(pasteMenuItem);
-                editMenu.addSeparator();
-
-                //---- deleteMenuItem ----
-                deleteMenuItem.setText("Delete");
-                deleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-                deleteMenuItem.setMnemonic('D');
-                deleteMenuItem.addActionListener(e -> menuItemActionPerformed(e));
-                editMenu.add(deleteMenuItem);
-            }
-            menuBar.add(editMenu);
-
+            buildFileMenu();
+            buildEditMenu();
             //======== viewMenu ========
             {
                 viewMenu.setText("View");
@@ -854,7 +870,7 @@ class DemoFrame extends JFrame {
         }
         setJMenuBar(menuBar);
 
-        //======== toolBarPanel ========
+        //======== 工具栏 ========
         {
             toolBarPanel.setLayout(new BorderLayout());
 
@@ -911,7 +927,7 @@ class DemoFrame extends JFrame {
         }
         contentPane.add(toolBarPanel, BorderLayout.PAGE_START);
 
-        //======== contentPanel ========
+        //======== 选项卡 ========
         {
             contentPanel.setLayout(new MigLayout(
                     "insets dialog,hidemode 3",
@@ -964,10 +980,6 @@ class DemoFrame extends JFrame {
         usersButton.addActionListener(e -> JOptionPane.showMessageDialog(null, "Hello User! How are you?", "User", JOptionPane.INFORMATION_MESSAGE));
         menuBar.add(Box.createGlue());
         menuBar.add(usersButton);
-
-        cutMenuItem.addActionListener(new DefaultEditorKit.CutAction());
-        copyMenuItem.addActionListener(new DefaultEditorKit.CopyAction());
-        pasteMenuItem.addActionListener(new DefaultEditorKit.PasteAction());
 
         scrollingPopupMenu.add("Large menus are scrollable");
         scrollingPopupMenu.add("Use mouse wheel to scroll");
