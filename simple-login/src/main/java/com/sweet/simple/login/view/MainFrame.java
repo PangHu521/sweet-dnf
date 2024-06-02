@@ -1,5 +1,8 @@
 package com.sweet.simple.login.view;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.thread.ThreadUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.demo.FlatLafDemo;
@@ -11,6 +14,7 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.util.FontUtils;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.sweet.simple.login.ViewStart;
+import com.sweet.simple.login.util.RsaUtil;
 import com.sweet.simple.login.view.HintManager.Hint;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -19,6 +23,7 @@ import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 
+import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -527,14 +532,21 @@ public class MainFrame extends JFrame {
      * 构建 Help 菜单选项
      */
     private void buildHelpMenu() {
+        JMenu helpMenu = new JMenu();
+        helpMenu.setText("关于");
+        helpMenu.setMnemonic('H');
+
         aboutMenuItem = new JMenuItem();
         aboutMenuItem.setText("帮助");
         aboutMenuItem.setMnemonic('A');
         aboutMenuItem.addActionListener(e -> aboutActionPerformed());
-        JMenu helpMenu = new JMenu();
-        helpMenu.setText("关于");
-        helpMenu.setMnemonic('H');
         helpMenu.add(aboutMenuItem);
+
+        // 生成秘钥对，暂时放在帮助菜单下 TODO
+        JMenuItem createSecretKeyMenuItem = new JMenuItem();
+        createSecretKeyMenuItem.setText("生成密钥对");
+        createSecretKeyMenuItem.addActionListener(e -> createSecretKeyMenuItemAction());
+        helpMenu.add(createSecretKeyMenuItem);
 
         menuBar.add(helpMenu);
     }
@@ -1054,5 +1066,32 @@ public class MainFrame extends JFrame {
                         linkLabel,
                 },
                 "关于", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    /**
+     * 生成秘钥对操作方法，文件生成以后放到桌面
+     * 格式化秘钥 TODO
+     */
+    private void createSecretKeyMenuItemAction() {
+        Tuple tuple = RsaUtil.createSecretKeyPair(true, true);
+        File userHOmeDir = FileUtil.getUserHomeDir();
+        // 用户桌面路径
+        String desktopPath = userHOmeDir.getAbsolutePath() + "\\Desktop\\";
+        FileUtil.writeUtf8String(tuple.get(0), desktopPath + "privatekey.pem");
+        FileUtil.writeUtf8String(tuple.get(1), desktopPath + "publickey.pem");
+        // 成功提示
+        showDialog("密钥对生成成功");
+    }
+
+    /**
+     * 简单的信息提示弹窗，后面需要进行抽象封装 TODO
+     *
+     * @param message 提示信息
+     */
+    private void showDialog(String message) {
+        Window window = SwingUtilities.windowForComponent(this);
+        JOptionPane optionPane = new JOptionPane();
+        optionPane.setMessage(message);
+        JOptionPane.showOptionDialog(window, optionPane.getMessage(), "提示", optionPane.getOptionType(), optionPane.getMessageType(), optionPane.getIcon(), optionPane.getOptions(), optionPane.getInitialValue());
     }
 }
