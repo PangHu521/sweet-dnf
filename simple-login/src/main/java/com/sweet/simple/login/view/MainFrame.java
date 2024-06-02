@@ -132,8 +132,8 @@ public class MainFrame extends JFrame {
         // initAccentColors();
         // initFullWindowContent();
         controlBar.initialize(this, tabbedPane);
-
-        setIconImages(FlatSVGUtils.createWindowIconImages("/com/formdev/flatlaf/demo/FlatLaf.svg"));
+        // 设置logo
+        setIconImages(FlatSVGUtils.createWindowIconImages("/com/formdev/flatlaf/demo/logo.svg"));
 
         // 检查选项卡索引是否在有效范围内，并且不等于当前选定的选项卡索引
         if (tabIndex >= 0 && tabIndex < tabbedPane.getTabCount() && tabIndex != tabbedPane.getSelectedIndex())
