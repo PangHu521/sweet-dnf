@@ -12,6 +12,11 @@ import com.formdev.flatlaf.util.FontUtils;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.sweet.simple.login.ViewStart;
 import com.sweet.simple.login.view.HintManager.Hint;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -20,6 +25,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,6 +39,7 @@ import java.util.prefs.Preferences;
  *
  * @author 大师兄
  */
+@Slf4j
 public class MainFrame extends JFrame {
 
     private int initialFontMenuItemCount = -1;
@@ -207,6 +214,7 @@ public class MainFrame extends JFrame {
 
         // 打开菜单项
         JMenuItem openMenuItem = new JMenuItem();
+        openMenuItem.setText("打开");
         // 快捷键 Ctrl + O
         openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         openMenuItem.setMnemonic('O');
@@ -626,11 +634,13 @@ public class MainFrame extends JFrame {
         controlBar = new ControlBar();
         JPanel contentPanel = new JPanel();
         LoginComponentsPanel loginComponentsPanel = new LoginComponentsPanel();
-
+        RegisterLoginPanel registerLoginPanel = new RegisterLoginPanel();
         contentPanel.setLayout(new MigLayout("insets dialog,hidemode 3", "[grow,fill]", "[grow,fill]"));
+
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener(e -> selectedTabChanged());
         tabbedPane.addTab("Basic Components", loginComponentsPanel);
+        tabbedPane.addTab("注册登录", registerLoginPanel);
         // tabbedPane.addTab("More Components", moreComponentsPanel);
         // tabbedPane.addTab("Data Components", dataComponentsPanel);
         // tabbedPane.addTab("Tabs", tabsPanel);
@@ -680,9 +690,32 @@ public class MainFrame extends JFrame {
 
     /**
      * 【打开】菜单项操作方法
+     * 选择文件界面比较丑，后面优化 TODO
      */
     private void openMenuItemAction() {
-
+        // 使用javafx的选择文件窗口，软件应用窗口会变小，无法解决 TODO
+        /*
+        new JFXPanel();
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        Platform.runLater(() -> {
+            File selectedDirectory = directoryChooser.showDialog(null);
+        });
+        */
+        // 默认首先搜寻路径,可根据自己的需要进行修改
+        JFileChooser chooser = new JFileChooser("C:\\Users\\76789\\Desktop");
+        // 显示文件选择对话框并等待用户操作
+        int result = chooser.showOpenDialog(this);
+        // 判断用户是否点击了打开按钮
+        if (result == JFileChooser.APPROVE_OPTION) {
+            // 获取用户选择的文件对象
+            File selectedFile = chooser.getSelectedFile();
+            // 进一步处理文件，例如获取文件名、路径等信息
+            String fileName = selectedFile.getName();
+            String filePath = selectedFile.getAbsolutePath();
+            // 在这里可以对文件进行进一步操作，比如读取文件内容、显示文件信息等
+            log.info("选择的文件名：{}", fileName);
+            log.info("选择的文件路径：{}", filePath);
+        }
     }
 
     /**

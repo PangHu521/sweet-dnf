@@ -1,6 +1,5 @@
 package com.sweet.simple.login.intellijthemes;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.formdev.flatlaf.json.Json;
 import com.formdev.flatlaf.util.LoggingFacade;
