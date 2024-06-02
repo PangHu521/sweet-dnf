@@ -13,8 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class FlatLafDemo {
-	static final String PREFS_ROOT_PATH = "/flatlaf-demo";
-	static final String KEY_TAB = "tab";
+	public static final String PREFS_ROOT_PATH = "/flatlaf-demo";
+	public static final String KEY_TAB = "tab";
 
 	static boolean screenshotsMode = Boolean.parseBoolean( System.getProperty( "flatlaf.demo.screenshotsMode" ) );
 
@@ -51,7 +51,7 @@ public class FlatLafDemo {
 			System.setProperty( "flatlaf.uiScale", "2x" );
 
 		SwingUtilities.invokeLater( () -> {
-			DemoPrefs.init( PREFS_ROOT_PATH );
+			DemoPrefs.init(PREFS_ROOT_PATH);
 
 			// install fonts for lazy loading
 			FlatInterFont.installLazy();
@@ -79,7 +79,7 @@ public class FlatLafDemo {
 			FlatLaf.registerCustomDefaultsSource( "com.formdev.flatlaf.demo" );
 
 			// set look and feel
-			DemoPrefs.setupLaf( args );
+			DemoPrefs.setupLaf(args);
 
 			// install inspectors
 			FlatInspector.install( "ctrl shift alt X" );

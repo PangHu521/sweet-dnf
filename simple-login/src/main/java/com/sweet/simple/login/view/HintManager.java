@@ -1,6 +1,7 @@
-package com.formdev.flatlaf.demo;
+package com.sweet.simple.login.view;
 
 import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.demo.DemoPrefs;
 import com.formdev.flatlaf.ui.FlatDropShadowBorder;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatUIUtils;

@@ -18,9 +18,7 @@ import static com.formdev.flatlaf.FlatClientProperties.*;
 /**
  * @author Karl Tauber
  */
-class TabsPanel
-	extends JPanel
-{
+class TabsPanel extends JPanel {
 	TabsPanel() {
 		initComponents();
 
