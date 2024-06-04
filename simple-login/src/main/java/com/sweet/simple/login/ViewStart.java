@@ -55,5 +55,9 @@ public class ViewStart {
 		mainFrame.pack();
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setVisible(true);
+		// LoginSwing loginSwing = new LoginSwing();
+		// loginSwing.pack();
+		// loginSwing.setLocationRelativeTo(null);
+		// loginSwing.setVisible(true);
 	}
 }

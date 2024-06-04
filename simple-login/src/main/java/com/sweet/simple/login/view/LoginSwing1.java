@@ -1,6 +1,10 @@
 package com.sweet.simple.login.view;
 
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sweet.simple.login.entity.Accounts;
 import com.sweet.simple.login.service.AccountsService;
+import com.sweet.simple.login.util.RsaUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,13 +13,15 @@ import javax.annotation.Resource;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.File;
 
 /**
  * 用户登录窗体
  */
+
 @Slf4j
-@Component
-public class LoginSwing extends JFrame {
+@Component("LoginSwing")
+public class LoginSwing1 extends JFrame {
 
     /**
      * 游戏目录
@@ -34,7 +40,7 @@ public class LoginSwing extends JFrame {
     private final JTextField usernameFiled;
 
 
-    public LoginSwing() {
+    public LoginSwing1() {
         // 设置主题
         com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightIJTheme.setup();
         setTitle("登陆界面");
@@ -60,12 +66,12 @@ public class LoginSwing extends JFrame {
         JButton loginBtn = new JButton("登录");
         // 登陆操作
         loginBtn.addActionListener(e -> loginAction());
-        loginBtn.setBounds(81, 214, 93, 23);
+        loginBtn.setBounds(30, 214, 100, 23);
         root.add(loginBtn);
         // 添加注册按钮
         JButton registerBtn = new JButton("注册");
         registerBtn.addActionListener(e -> showRegisterWindow());
-        registerBtn.setBounds(210, 214, 93, 23);
+        registerBtn.setBounds(170, 214, 100, 23);
         root.add(registerBtn);
         // 添加注册按钮
         JButton cdkBtn = new JButton("cdk兑换");
@@ -79,16 +85,7 @@ public class LoginSwing extends JFrame {
      */
     @SneakyThrows
     private void loginAction() {
-        // 测试弹窗
-        SweetPreferences.getState().putBoolean("test", false);
-        HintManager.Hint testHint = new HintManager.Hint("Use 'Font' menu to increase/decrease font size or try different fonts.",
-                usernameFiled, SwingConstants.BOTTOM, "test", null);
-        log.info("执行了。。。。。");
-        HintManager.showHint(testHint);
-
-        // SwingUtilities.invokeLater(this::showHints);
-
-        /*String username = usernameFiled.getText();
+        String username = usernameFiled.getText();
         if (StrUtil.isBlank(username)) {
             JOptionPane.showMessageDialog(null, "账号不能为空", "提示", JOptionPane.ERROR_MESSAGE);
         }
@@ -108,7 +105,7 @@ public class LoginSwing extends JFrame {
         // 登陆成功，本窗口隐藏
         setVisible(false);
         // 销毁本窗口
-        dispose();*/
+        dispose();
     }
 
     /**

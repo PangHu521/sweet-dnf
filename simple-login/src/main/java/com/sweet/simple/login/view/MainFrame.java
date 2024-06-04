@@ -2,7 +2,6 @@ package com.sweet.simple.login.view;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
-import cn.hutool.core.thread.ThreadUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.demo.FlatLafDemo;
@@ -16,14 +15,9 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.sweet.simple.login.ViewStart;
 import com.sweet.simple.login.util.RsaUtil;
 import com.sweet.simple.login.view.HintManager.Hint;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 
-import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
