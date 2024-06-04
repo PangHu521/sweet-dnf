@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author 24868
- * @description 针对表【charac_info】的数据库操作Service实现
- * @createDate 2024-06-03 20:34:29
- */
+ * @Author: [ph]
+ * @Date: 2024/6/3 22:58
+ * @Description: 角色表具体业务实现
+ **/
 @Service
 public class CharacInfoServiceImpl extends ServiceImpl<CharacInfoMapper, CharacInfo> implements CharacInfoService {
 

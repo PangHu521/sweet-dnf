@@ -6,8 +6,10 @@ import com.sweet.simple.login.entity.Accounts;
 import com.sweet.simple.login.entity.CdkManagement;
 import com.sweet.simple.login.entity.CharacInfo;
 import com.sweet.simple.login.entity.Postal;
+import com.sweet.simple.login.service.PostalService;
 import com.sweet.simple.login.service.impl.CharacInfoServiceImpl;
 import com.sweet.simple.login.service.impl.PostalServiceImpl;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.swing.*;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 /**
  * @Author: [ph]
  * @Date: 2024/6/1 17:05
- * @Description:
+ * @Description: cdk兑换界面
  **/
 public class CdkSwing extends JFrame {
 
@@ -31,13 +33,14 @@ public class CdkSwing extends JFrame {
     private Integer uid;
     // 角色名称下拉框
     private JComboBox<String> characterNameBox;
+
     @Resource
     private CharacInfoServiceImpl characInfoServiceImpl;
 
     @Resource
-    private PostalServiceImpl postalServiceImpl;
+    private PostalService postalService;
 
-    public CdkSwing(String characterName) {
+    public CdkSwing(String accountName) {
         setTitle("cdk兑换界面");
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -54,13 +57,13 @@ public class CdkSwing extends JFrame {
         root.add(cdkCodeFiled);
         cdkCodeFiled.setColumns(10);
 
-        if (characterName.isEmpty()) {
+        if (accountName.isEmpty()) {
             JOptionPane.showMessageDialog(null, "请先在登录界面输入账号", "提示", JOptionPane.ERROR_MESSAGE);
             return;
         }
         // 根据登录页面传递的账号查询uid
         Accounts accounts = Db.lambdaQuery(Accounts.class)
-                .eq(Accounts::getAccountName, characterName).one();
+                .eq(Accounts::getAccountName, accountName).one();
         if (ObjectUtil.isEmpty(accounts)) {
             JOptionPane.showMessageDialog(null, "该账号不存在，请重新输入", "提示", JOptionPane.ERROR_MESSAGE);
             return;
@@ -102,6 +105,7 @@ public class CdkSwing extends JFrame {
         if (!cdkList.isEmpty()) {
             if (!cdkList.contains(cdkCode)) {
                 JOptionPane.showMessageDialog(null, "输入的cdk有误或该cdk已被使用", "提示", JOptionPane.ERROR_MESSAGE);
+                return;
             }
         }
         // 构建插入对象
@@ -112,7 +116,7 @@ public class CdkSwing extends JFrame {
                 .itemId(3340)
                 .addInfo(5).build();
         // 插入
-        boolean save = postalServiceImpl.save(postal);
+        boolean save = postalService.save(postal);
         if (save) {
             // cdk状态设置为使用
         }

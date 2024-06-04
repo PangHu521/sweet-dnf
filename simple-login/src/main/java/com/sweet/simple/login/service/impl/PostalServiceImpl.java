@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 /**
  * @Author: [ph]
  * @Date: 2024/6/3 22:58
- * @Description:
+ * @Description: 邮件表具体业务实现
  **/
 @Service
 public class PostalServiceImpl extends ServiceImpl<PostalMapper, Postal> implements PostalService {

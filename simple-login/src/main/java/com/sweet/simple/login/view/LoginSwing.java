@@ -60,14 +60,14 @@ public class LoginSwing extends JFrame {
         JButton loginBtn = new JButton("登录");
         // 登陆操作
         loginBtn.addActionListener(e -> loginAction());
-        loginBtn.setBounds(81, 214, 93, 23);
+        loginBtn.setBounds(40, 214, 93, 23);
         root.add(loginBtn);
         // 添加注册按钮
         JButton registerBtn = new JButton("注册");
         registerBtn.addActionListener(e -> showRegisterWindow());
-        registerBtn.setBounds(210, 214, 93, 23);
+        registerBtn.setBounds(175, 214, 93, 23);
         root.add(registerBtn);
-        // 添加注册按钮
+        // 添加cdk兑换按钮
         JButton cdkBtn = new JButton("cdk兑换");
         cdkBtn.addActionListener(e -> showCdkWindow());
         cdkBtn.setBounds(310, 214, 100, 23);
